@@ -96,10 +96,13 @@ const DEFAULTS = {
   cat:'Default', sty:'Standard (neutral)', dec:2,
   zero:'zero', neg:'minus', trail:'show', th:'on', cur:'none',
   ind:'triangle', plus:'show', showInd:'on', indPos:'before',
-  engine:'measure', samples:'realistic', sep:'eu'
+  engine:'measure', samples:'realistic'
 };
 
 let S = {...DEFAULTS};
+const USER_LOCALE = (typeof navigator !== 'undefined' && navigator.languages && navigator.languages.length)
+  ? navigator.languages
+  : (typeof navigator !== 'undefined' && navigator.language ? navigator.language : undefined);
 
 /* ── Sample data ────────────────────────────────────────────────────── */
 const NUMS = {
@@ -117,9 +120,12 @@ function getSamples(){
 }
 
 /* ── Format logic (unchanged) ───────────────────────────────────────── */
-function applyDisplaySep(str){
-  if(S.sep==='us')return str;
-  return str.replace(/\./g,'\x00').replace(/,/g,'.').replace(/\x00/g,',');
+function formatLocaleNumber(value, decimals, useGrouping, trimZeros){
+  return new Intl.NumberFormat(USER_LOCALE, {
+    useGrouping: useGrouping,
+    minimumFractionDigits: trimZeros ? 0 : decimals,
+    maximumFractionDigits: decimals
+  }).format(value);
 }
 
 function lookupBase(){
@@ -220,14 +226,10 @@ function fmtSample(v){
     let zs='';if(cat==='Thousands (K)')zs='K';else if(cat==='Millions (M)')zs='M';else if(cat==='Billions (B)')zs='B';
     return(iP?'':sym)+'0'+zs;
   }
-  let f;
-  if(useTh){const p=abs.toFixed(S.dec).split('.');p[0]=p[0].replace(/\B(?=(\d{3})+(?!\d))/g,',');f=p.join('.');}
-  else f=abs.toFixed(S.dec);
-  if(S.trail==='hide'&&S.dec>0){f=f.replace(/\.(\d*?)0+$/,(_,d)=>d.replace(/0+$/,'')?'.'+d.replace(/0+$/,''):'');}
+  let f = formatLocaleNumber(abs, S.dec, useTh, S.trail==='hide'&&S.dec>0);
   f+=suf;
   const iP2=cat==="Percentage"||cat==="Percentage point (pp)";
   if(S.cur!=='none'&&!iP2){const s=S.cur==='euro'?'\u20ac':'$';f=s+f;}
-  f=applyDisplaySep(f);
   const pair=INDICATORS.find(p=>p.k===S.ind);
   const hasInd=S.sty.startsWith('Variance')&&S.showInd==='on'&&pair;
   const bef=S.indPos==='before';
@@ -244,10 +246,7 @@ function fmtSample(v){
 function fmtRaw(v){
   const iP=S.cat==="Percentage"||S.cat==="Percentage point (pp)";
   const d=iP?4:2;
-  const n=v<0,a=Math.abs(v);
-  const parts=a.toFixed(d).split('.');
-  parts[0]=parts[0].replace(/\B(?=(\d{3})+(?!\d))/g,',');
-  return applyDisplaySep((n?'-':'')+parts.join('.'));
+  return formatLocaleNumber(v, d, true, false);
 }
 
 /* ── UI helpers ─────────────────────────────────────────────────────── */
@@ -303,8 +302,7 @@ var VALID_VALUES = {
   showInd: ['on','off'],
   indPos: ['before','after'],
   engine: ['measure','format'],
-  samples: ['realistic','round'],
-  sep: ['eu','us']
+  samples: ['realistic','round']
 };
 
 function loadHash() {
@@ -353,15 +351,6 @@ function render() {
   document.getElementById('decGroup').innerHTML = [0, 1, 2].map(function(d) {
     return '<div class="seg-opt' + (d === S.dec ? ' active' : '') + '" role="radio" aria-checked="' + (d === S.dec) + '" tabindex="' + (d === S.dec ? '0' : '-1') + '" onclick="sel(\'dec\',' + d + ')">' + d + '</div>';
   }).join('');
-
-  // Separator
-  var sepOpts = [{k:'eu',l:'1.000,00'},{k:'us',l:'1,000.00'}];
-  document.getElementById('sepGroup').innerHTML = sepOpts.map(function(o) {
-    return '<div class="seg-opt' + (S.sep === o.k ? ' active' : '') + '" role="radio" aria-checked="' + (S.sep === o.k) + '" tabindex="' + (S.sep === o.k ? '0' : '-1') + '" onclick="sel(\'sep\',\'' + o.k + '\')">' + o.l + '</div>';
-  }).join('');
-  document.getElementById('sepHint').textContent = S.sep === 'eu'
-    ? 'EU style \u2014 preview only'
-    : 'US/UK style \u2014 preview only';
 
   // Sample toggle
   document.getElementById('sampleToggle').innerHTML = [{k:'realistic',l:'Realistic'},{k:'round',l:'Simple'}].map(function(o) {

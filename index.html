@@ -77,24 +77,9 @@
         <div id="catNumbers" class="chip-group" role="radiogroup" aria-label="Number categories"></div>
         <div class="config-group-label">Percentage</div>
         <div id="catPct" class="chip-group" role="radiogroup" aria-label="Percentage categories"></div>
-      </section>
-
-      <section class="config-section">
-        <h3 class="config-label">Format Style</h3>
+        <div class="config-group-label">Format Style</div>
         <div id="styleGroup" class="chip-group" role="radiogroup" aria-label="Format style"></div>
       </section>
-
-      <div class="config-row">
-        <section class="config-section config-half">
-          <h3 class="config-label">Decimal Places</h3>
-          <div id="decGroup" class="seg-group" role="radiogroup" aria-label="Decimal places"></div>
-        </section>
-        <section class="config-section config-half">
-          <h3 class="config-label">Separator Convention</h3>
-          <div id="sepGroup" class="seg-group" role="radiogroup" aria-label="Separator convention"></div>
-          <span id="sepHint" class="hint"></span>
-        </section>
-      </div>
 
       <section class="config-section">
         <div class="config-label-row">
@@ -109,6 +94,10 @@
         <div class="mod-row">
           <span class="mod-label">Negative values</span>
           <div id="negOpts" class="mod-pills" role="radiogroup" aria-label="Negative values"></div>
+        </div>
+        <div class="mod-row">
+          <span class="mod-label">Decimals</span>
+          <div id="decGroup" class="seg-group mod-seg" role="radiogroup" aria-label="Decimal places"></div>
         </div>
         <div id="thWrap" class="mod-row">
           <span class="mod-label">Thousands sep.</span>
@@ -173,16 +162,12 @@
       </div>
       <h2 id="modalTitle">How to use DAX Format Builder</h2>
     </div>
-    <div class="modal-step"><div class="modal-num">1</div><div class="modal-text">Choose a <strong>display category</strong>, <strong>format style</strong>, <strong>decimal places</strong> and <strong>separator convention</strong> from the configuration panel.</div></div>
+    <div class="modal-step"><div class="modal-num">1</div><div class="modal-text">Choose a <strong>display category</strong> and <strong>format style</strong> from the configuration panel.</div></div>
     <div class="modal-step"><div class="modal-num">2</div><div class="modal-text">Use the <strong>Options</strong> section to customise zero handling, negative display, thousands separator, trailing zeros, and currency symbol.</div></div>
     <div class="modal-step"><div class="modal-num">3</div><div class="modal-text">The <strong>format string</strong> updates live at the top. Press <strong>Copy</strong> and paste directly into Power BI.</div></div>
     <div class="modal-info-box">
       <h4>Format string structure</h4>
       <p><code>positive ; negative ; zero</code><br><br>Each section is separated by a semicolon. This tool always generates all three parts so you have full control over how zeros appear.</p>
-    </div>
-    <div class="modal-info-box">
-      <h4>Separator convention</h4>
-      <p>The format string itself does not change &mdash; Power BI applies separators based on your report locale. The toggle adjusts the <strong>sample preview only</strong> so you can verify output looks correct for your region.</p>
     </div>
     <button class="modal-close" onclick="closeModal()">Got it</button>
   </div>
