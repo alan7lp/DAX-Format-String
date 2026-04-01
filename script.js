@@ -289,18 +289,45 @@ function saveHash() {
   history.replaceState(null, '', params.length ? '#' + params.join('&') : location.pathname);
 }
 
+var VALID_VALUES = {
+  cat: ['Default','Thousands','Thousands (K)','Millions','Millions (M)','Billions','Billions (B)','Percentage','Percentage point (pp)'],
+  sty: ['Standard (neutral)','Variance with plus (+) sign for pos. var'],
+  dec: [0, 1, 2],
+  zero: ['zero','plain','dash','empty'],
+  neg: ['minus','brackets'],
+  trail: ['show','hide'],
+  th: ['on','off'],
+  cur: ['none','euro','dollar'],
+  ind: ['triangle','chevron','trend','diagonal','check'],
+  plus: ['show','hide'],
+  showInd: ['on','off'],
+  indPos: ['before','after'],
+  engine: ['measure','format'],
+  samples: ['realistic','round'],
+  sep: ['eu','us']
+};
+
 function loadHash() {
   var hash = location.hash.slice(1);
   if (!hash) return;
-  hash.split('&').forEach(function(pair) {
-    var parts = pair.split('=');
-    if (parts.length !== 2) return;
-    var k = decodeURIComponent(parts[0]);
-    var v = decodeURIComponent(parts[1]);
-    if (!(k in DEFAULTS)) return;
-    if (k === 'dec') S[k] = parseInt(v, 10);
-    else S[k] = v;
-  });
+  try {
+    hash.split('&').forEach(function(pair) {
+      var parts = pair.split('=');
+      if (parts.length !== 2) return;
+      var k, v;
+      try { k = decodeURIComponent(parts[0]); v = decodeURIComponent(parts[1]); }
+      catch(e) { return; }
+      if (!(k in DEFAULTS) || !(k in VALID_VALUES)) return;
+      if (k === 'dec') {
+        var n = parseInt(v, 10);
+        if (VALID_VALUES.dec.indexOf(n) !== -1) S[k] = n;
+      } else {
+        if (VALID_VALUES[k].indexOf(v) !== -1) S[k] = v;
+      }
+    });
+  } catch(e) {
+    Object.assign(S, DEFAULTS);
+  }
 }
 
 /* ── Render ─────────────────────────────────────────────────────────── */
